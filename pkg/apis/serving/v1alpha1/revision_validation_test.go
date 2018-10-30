@@ -62,7 +62,8 @@ func TestContainerValidation(t *testing.T) {
 				},
 			},
 		},
-		want: apis.ErrDisallowedFields("resources"),
+		//want: apis.ErrDisallowedFields("resources"),
+		want: nil,
 	}, {
 		name: "has ports",
 		c: corev1.Container{
@@ -136,11 +137,6 @@ func TestContainerValidation(t *testing.T) {
 		name: "has numerous problems",
 		c: corev1.Container{
 			Name: "foo",
-			Resources: corev1.ResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceName("cpu"): resource.MustParse("25m"),
-				},
-			},
 			Ports: []corev1.ContainerPort{{
 				Name:          "http",
 				ContainerPort: 8080,
@@ -151,7 +147,8 @@ func TestContainerValidation(t *testing.T) {
 			}},
 			Lifecycle: &corev1.Lifecycle{},
 		},
-		want: apis.ErrDisallowedFields("name", "resources", "ports", "volumeMounts", "lifecycle"),
+		//Allow resources as a part of the fields
+		want: apis.ErrDisallowedFields("name", "ports", "volumeMounts", "lifecycle"),
 	}}
 
 	for _, test := range tests {

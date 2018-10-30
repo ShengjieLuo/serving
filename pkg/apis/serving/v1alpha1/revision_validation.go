@@ -22,6 +22,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/validation"
 
@@ -106,9 +107,10 @@ func validateContainer(container corev1.Container) *apis.FieldError {
 	if container.Name != "" {
 		ignoredFields = append(ignoredFields, "name")
 	}
-	if !equality.Semantic.DeepEqual(container.Resources, corev1.ResourceRequirements{}) {
+	//Remove the ignoreFields in the "resources", enable the resources as an effective result
+	/*if !equality.Semantic.DeepEqual(container.Resources, corev1.ResourceRequirements{}) {
 		ignoredFields = append(ignoredFields, "resources")
-	}
+	}*/
 	if len(container.Ports) > 0 {
 		ignoredFields = append(ignoredFields, "ports")
 	}

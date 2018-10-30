@@ -95,12 +95,34 @@ func rewriteUserProbe(p *corev1.Probe) {
 	}
 }
 
+func applyDefaultResources(out *corev1.ResourceRequirements) {
+	in := userResources.DeepCopy()
+	if in.Limits != nil {
+		in, out := &in.Limits, &out.Limits
+		for key, val := range *out {
+			(*in)[key] = val.DeepCopy()
+		}
+		(*out) = (*in)
+	}
+	if in.Requests != nil {
+		in, out := &in.Requests, &out.Requests
+		for key, val := range *out {
+			(*in)[key] = val.DeepCopy()
+		}
+		(*out) = (*in)
+	}
+}
+
 func makePodSpec(rev *v1alpha1.Revision, loggingConfig *logging.Config, observabilityConfig *config.Observability, autoscalerConfig *autoscaler.Config, controllerConfig *config.Controller) *corev1.PodSpec {
 	userContainer := rev.Spec.Container.DeepCopy()
 	// Adding or removing an overwritten corev1.Container field here? Don't forget to
 	// update the validations in pkg/webhook.validateContainer.
 	userContainer.Name = userContainerName
-	userContainer.Resources = userResources
+
+	//Revise the resources specification from the given parameter
+	//userContainer.Resources = userResources
+	applyDefaultResources(&userContainer.Resources)
+
 	userContainer.Ports = userPorts
 	userContainer.VolumeMounts = append(userContainer.VolumeMounts, varLogVolumeMount)
 	userContainer.Lifecycle = userLifecycle
